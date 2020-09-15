@@ -8,41 +8,44 @@ import { useStateValue } from "./state";
 import { Patient } from "./types";
 
 import PatientListPage from "./PatientListPage";
+import SinglePatientPage from "./SinglePatientPage";
 
 const App: React.FC = () => {
-  const [, dispatch] = useStateValue();
-  React.useEffect(() => {
-    axios.get<void>(`${apiBaseUrl}/ping`);
+    const [, dispatch] = useStateValue();
+    React.useEffect(() => {
+        axios.get<void>(`${apiBaseUrl}/ping`);
 
-    const fetchPatientList = async () => {
-      try {
-        const { data: patientListFromApi } = await axios.get<Patient[]>(
-          `${apiBaseUrl}/patients`
-        );
-        dispatch({ type: "SET_PATIENT_LIST", payload: patientListFromApi });
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchPatientList();
-  }, [dispatch]);
+        const fetchPatientList = async () => {
+            try {
+                const { data: patientListFromApi } = await axios.get<Patient[]>(
+                    `${apiBaseUrl}/patients`
+                );
+                dispatch({ type: "SET_PATIENT_LIST", payload: patientListFromApi });
+            } catch (e) {
+                console.error(e);
+            }
+        };
+        fetchPatientList();
+    }, [dispatch]);
 
-  return (
-    <div className="App">
-      <Router>
-        <Container>
-          <Header as="h1">Patientor</Header>
-          <Button as={Link} to="/" primary>
-            Home
-          </Button>
-          <Divider hidden />
-          <Switch>
-            <Route path="/" render={() => <PatientListPage />} />
-          </Switch>
-        </Container>
-      </Router>
-    </div>
-  );
+    return (
+        <div className="App">
+            <Router>
+                <Container>
+                    <Header as="h1">Patientor</Header>
+                    <Button as={Link} to="/" primary>
+                        Home
+                    </Button>
+                    <Divider hidden />
+                    <Switch>
+                        <Route path="/api/patients/:id"
+                            render={() => <SinglePatientPage />} />
+                        <Route path="/" render={() => <PatientListPage />} />
+                    </Switch>
+                </Container>
+            </Router>
+        </div>
+    );
 };
 
 export default App;
