@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { apiBaseUrl } from "../constants";
 import { Patient } from "../types";
-import { useStateValue } from "../state";
+import { useStateValue, updatePatient } from "../state";
 
 const SinglePatientPage: React.FC = () => {
     const [{ patients }, dispatch] = useStateValue();
@@ -15,7 +15,8 @@ const SinglePatientPage: React.FC = () => {
                 const { data: patientFromApi } = await axios.get<Patient>(
                     `${apiBaseUrl}/patients/${id}`
                 );
-                dispatch({ type: "UPDATE_PATIENT", payload: patientFromApi });
+                //dispatch({ type: "UPDATE_PATIENT", payload: patientFromApi });
+                dispatch(updatePatient(patientFromApi));
             } catch (e) {
                 console.error(e);
             }
