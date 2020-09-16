@@ -2,22 +2,12 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { apiBaseUrl } from "../constants";
-import { Patient, Entry, Diagnosis } from "../types";
+import { Patient, Entry, Diagnosis, HealthCheckRating, HospitalEntry, HealthCheckEntry, OccupationalHealthcareEntry } from "../types";
 import { useStateValue, updatePatient } from "../state";
 
 const SinglePatientPage: React.FC = () => {
     const [{ patients, diagnoses }, dispatch] = useStateValue();
     const { id } = useParams<{ id: string }>();
-
-    // useEffect(() => {
-    //     //FIXME
-    //     const fetchDiagnoses = async () => {
-    //         console.log("fetching diagnoses");
-    //         const { data: diagnoses } = await axios.get<Diagnosis>(`${apiBaseUrl}/diagnoses`);
-    //         console.log('diagnoses', diagnoses);
-    //     };
-    //     fetchDiagnoses();
-    // }, []);
 
     useEffect(() => {
         const findPatient = async () => {
@@ -44,7 +34,7 @@ const SinglePatientPage: React.FC = () => {
 
     const patientToShow: Patient | undefined = Object.values(patients).find(patient => patient.id === id);
 
-    
+
 
     return (
         <>
@@ -57,16 +47,8 @@ const SinglePatientPage: React.FC = () => {
                     <h3>entries</h3>
                     {patientToShow.entries && patientToShow.entries.map((entry: Entry) =>
                         <div key={entry.id}>
-                            <p>{entry.date} {entry.description}</p>
-                            {entry.diagnosisCodes &&
-                                <ul>
-                                    {entry.diagnosisCodes.map((diagnosis: string) =>
-                                        <li key={diagnosis}>{diagnosis} {diagnoses.find((d: Diagnosis) =>
-                                            d.code.valueOf() === diagnosis.valueOf())?.name}
-                                        </li>
-                                    )}
-                                </ul>
-                            }
+
+                            <EntryDetails entry={entry} diagnoses={diagnoses} />
                         </div>
                     )}
                 </div>
@@ -74,5 +56,84 @@ const SinglePatientPage: React.FC = () => {
         </>
     );
 };
+
+const assertNever = (value: never): never => {
+    throw new Error(
+        `Unhandled discriminated union member: ${JSON.stringify(value)}`
+    );
+};
+
+const EntryDetails: React.FC<{ entry: Entry; diagnoses: Diagnosis[] }> = ({ entry, diagnoses }) => {
+    switch (entry.type) {
+        case "Hospital":
+            return <HospitalEntryComponent entry={entry} diagnoses={diagnoses} />;
+        case "OccupationalHealthcare":
+            return <OccupationalHealthcareEntryComponent entry={entry} diagnoses={diagnoses} />;
+        case "HealthCheck":
+            return <HealthCheckEntryComponent entry={entry} diagnoses={diagnoses} />;
+        default:
+            return assertNever(entry);
+    }
+};
+
+
+const style = {
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5
+};
+
+const HospitalEntryComponent: React.FC<{ entry: HospitalEntry; diagnoses: Diagnosis[] }> = ({ entry, diagnoses }) => {
+    return (
+        <div style={style}>
+            <h3>Hospital {entry.date}</h3>
+            <p>{entry.description}</p>
+            {entry.diagnosisCodes &&
+                <DiagnosisCodesComponent entry={entry} diagnoses={diagnoses} />
+            }
+        </div>
+    );
+};
+
+const OccupationalHealthcareEntryComponent: React.FC<{ entry: OccupationalHealthcareEntry; diagnoses: Diagnosis[] }> = ({ entry, diagnoses }) => {
+    return (
+        <div style={style}>
+            <h3>Occupational healthcare {entry.date}</h3>
+            <p>{entry.description}</p>
+            {entry.diagnosisCodes &&
+                <DiagnosisCodesComponent entry={entry} diagnoses={diagnoses} />
+            }
+        </div>
+
+    );
+};
+
+const HealthCheckEntryComponent: React.FC<{ entry: HealthCheckEntry; diagnoses: Diagnosis[] }> = ({ entry, diagnoses }) => {
+    return (
+        <div style={style}>
+            <h3>Health check {entry.date}</h3>
+            <p>{entry.description}</p>
+            <p>Health rating: {HealthCheckRating[entry.healthCheckRating]}</p>
+            {entry.diagnosisCodes &&
+                <DiagnosisCodesComponent entry={entry} diagnoses={diagnoses} />
+            }
+        </div>
+    );
+};
+
+const DiagnosisCodesComponent: React.FC<{ entry: Entry; diagnoses: Diagnosis[] }> = ({ entry, diagnoses }) => {
+    return (
+        <ul>
+            {entry.diagnosisCodes?.map((diagnosis: string) =>
+                <li key={diagnosis}>{diagnosis} {diagnoses.find((d: Diagnosis) =>
+                    d.code.valueOf() === diagnosis.valueOf())?.name}
+                </li>
+            )}
+        </ul>
+    );
+};
+
 
 export default SinglePatientPage;
