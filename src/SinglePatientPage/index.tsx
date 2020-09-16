@@ -2,12 +2,22 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { apiBaseUrl } from "../constants";
-import { Patient, Entry } from "../types";
+import { Patient, Entry, Diagnosis } from "../types";
 import { useStateValue, updatePatient } from "../state";
 
 const SinglePatientPage: React.FC = () => {
-    const [{ patients }, dispatch] = useStateValue();
+    const [{ patients, diagnoses }, dispatch] = useStateValue();
     const { id } = useParams<{ id: string }>();
+
+    // useEffect(() => {
+    //     //FIXME
+    //     const fetchDiagnoses = async () => {
+    //         console.log("fetching diagnoses");
+    //         const { data: diagnoses } = await axios.get<Diagnosis>(`${apiBaseUrl}/diagnoses`);
+    //         console.log('diagnoses', diagnoses);
+    //     };
+    //     fetchDiagnoses();
+    // }, []);
 
     useEffect(() => {
         const findPatient = async () => {
@@ -29,10 +39,12 @@ const SinglePatientPage: React.FC = () => {
         if (!Object.values(patients).find(patient => patient.id === id)?.ssn) {
             findPatient();
         }
-    }, [dispatch, id, patients]); //onko tää oikein?
+    }, [dispatch, id, patients]);
     // }, []);
 
     const patientToShow: Patient | undefined = Object.values(patients).find(patient => patient.id === id);
+
+    
 
     return (
         <>
@@ -49,7 +61,9 @@ const SinglePatientPage: React.FC = () => {
                             {entry.diagnosisCodes &&
                                 <ul>
                                     {entry.diagnosisCodes.map((diagnosis: string) =>
-                                        <li key={diagnosis}>{diagnosis}</li>
+                                        <li key={diagnosis}>{diagnosis} {diagnoses.find((d: Diagnosis) =>
+                                            d.code.valueOf() === diagnosis.valueOf())?.name}
+                                        </li>
                                     )}
                                 </ul>
                             }
