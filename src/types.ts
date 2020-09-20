@@ -52,10 +52,6 @@ export enum Gender {
   Other = "other"
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-//export interface Entry {
-//}
-
 export interface Patient {
   id: string;
   name: string;

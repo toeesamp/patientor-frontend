@@ -20,7 +20,6 @@ const App: React.FC = () => {
                 const { data: patientListFromApi } = await axios.get<Patient[]>(
                     `${apiBaseUrl}/patients`
                 );
-                //dispatch({ type: "SET_PATIENT_LIST", payload: patientListFromApi });
                 dispatch(setPatientList(patientListFromApi));
             } catch (e) {
                 console.error(e);
@@ -33,10 +32,8 @@ const App: React.FC = () => {
     React.useEffect(() => {
         const fetchDiagnoses = async () => {
             try {
-                // console.log("fetching diagnoses");
                 const { data: diagnoses } = await axios.get<Diagnosis[]>(`${apiBaseUrl}/diagnoses`);
                 dispatch(setDiagnosisList(diagnoses));
-                // console.log('diagnoses', diagnoses);
             } catch (e) {
                 console.error(e);
             }
